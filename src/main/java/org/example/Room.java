@@ -9,6 +9,11 @@ public class Room {
     private Mouse mouse;
 
     public Room(int width, int height, Snake snake) {
+        if (width <= 4 || height <= 4) {
+            throw new IllegalArgumentException(
+                    "Error when creating a room. The values for the room must be greater then 4"
+            );
+        }
         this.width = width;
         this.height = height;
         this.snake = snake;
@@ -53,7 +58,12 @@ public class Room {
         while (snake.isAlive()) {
             if (keyboardObserver.hasKeyEvents()) {
                 KeyEvent event = keyboardObserver.getEventFromTop();
-                if (event.getKeyChar()  == 'q') return;
+
+                if (event.getKeyChar()  == 'q' || event.getKeyChar() == 'Q'
+                        || event.getKeyChar() == 'й' || event.getKeyChar() == 'Й') {
+                    closeGame();
+                    return;
+                }
 
                 if (event.getKeyCode() == KeyEvent.VK_LEFT)
                     snake.setDirection(SnakeDirection.LEFT);
@@ -70,42 +80,32 @@ public class Room {
             sleep();
         }
 
-        System.out.println("Game Over!");
+        int playerScore = snake.getSections().size() - 1;
+        System.out.println("Game Over. Your score is " + playerScore);
+    }
+
+    public void closeGame() {
+        if (KeyboardObserver.frame != null) {
+            KeyboardObserver.frame.dispose();
+        }
     }
 
     public void print() {
-        int[][] matrix = new int[height][width];
-        final int SNAKE_BODY = 1, SNAKE_HEAD_ALIVE = 2,
-                  MOUSE = 3, SNAKE_HEAD_DEAD = 4;
-
-        for (SnakeSection section : snake.getSections()) {
-            matrix[section.getY()][section.getX()] = SNAKE_BODY;
+        if (KeyboardObserver.frame != null) {
+            KeyboardObserver.frame.setContentPane(new Layer());
+            KeyboardObserver.frame.revalidate();
         }
-
-        matrix[snake.getY()][snake.getX()] = snake.isAlive() ? SNAKE_HEAD_ALIVE : SNAKE_HEAD_DEAD;
-
-        matrix[mouse.getY()][mouse.getX()] = MOUSE;
-
-        String[] symbols = {".", "x", "X", "^", "RIP"};
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                System.out.print(symbols[matrix[y][x]]);
-            }
-            System.out.println();
-        }
-        System.out.println();
-        System.out.println();
-        System.out.println();
     }
 
 
-    private int initialDelay = 620;
-    private int delayStep = 20;
+    private int initialDelay = 520;
+    private int delayStep = 5;
+    private int minDelay = 110;
 
     public void sleep() {
         try {
             int level = snake.getSections().size();
-            int delay = level < 15 ? (initialDelay - delayStep * level) : 250;
+            int delay = Math.max(minDelay, (initialDelay - delayStep * level));
             Thread.sleep(delay);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -113,7 +113,32 @@ public class Room {
     }
 
     public void createMouse() {
-        mouse = new Mouse((int) (Math.random() * width), (int) (Math.random() * height));
+        int totalCells = width * height;
+        int occupiedCells = 0;
+        int mouseX, mouseY;
+        boolean isPositionValid;
+
+        do {
+            occupiedCells++;
+            if (occupiedCells >= totalCells) {
+                System.out.println("You Win! Your score is " + occupiedCells);
+                closeGame();
+                return;
+            }
+
+            mouseX = (int) (Math.random() * width);
+            mouseY = (int) (Math.random() * height);
+            isPositionValid = true;
+
+            for (SnakeSection section : snake.getSections()) {
+                if (section.getX() == mouseX && section.getY() == mouseY) {
+                    isPositionValid = false;
+                    break;
+                }
+            }
+        } while (!isPositionValid);
+
+        mouse = new Mouse(mouseX, mouseY);
     }
 
     public void eatMouse() {
@@ -123,7 +148,9 @@ public class Room {
     public static Room game;
 
     public static void main(String[] args) {
-        game = new Room(20, 20, new Snake(10, 10));
+        int widthRoom = 20;
+        int heightRoom = 20;
+        game = new Room(widthRoom, heightRoom, new Snake(widthRoom / 2, heightRoom / 2));
         game.snake.setDirection(SnakeDirection.DOWN);
         game.createMouse();
         game.run();
