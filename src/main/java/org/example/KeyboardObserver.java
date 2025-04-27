@@ -1,7 +1,6 @@
 package org.example;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
@@ -10,23 +9,21 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class KeyboardObserver extends Thread {
-    private Queue<KeyEvent> keyEvents = new ArrayBlockingQueue<>(100);
+    private final Queue<KeyEvent> keyEvents = new ArrayBlockingQueue<>(30);
 
-    private JFrame frame;
+    static JFrame frame;
 
     @Override
     public void run() {
         frame = new JFrame("KeyPress Tester");
-        frame.setTitle("Transparent JFrame Demo");
+        frame.setTitle("Snake");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        frame.setUndecorated(true);
-        frame.setSize(400, 400);
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        frame.setLayout(new GridBagLayout());
+        frame.setUndecorated(false);
+        frame.setSize((Room.game.getWidth() * 10) + 17, (Room.game.getHeight() * 10) + 39);
 
-        frame.setOpacity(0.0f);
         frame.setVisible(true);
+        frame.setLocationRelativeTo(null);
 
         frame.addFocusListener(new FocusListener() {
             @Override
