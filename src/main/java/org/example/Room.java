@@ -7,6 +7,9 @@ public class Room {
     private int height;
     private Snake snake;
     private Mouse mouse;
+    private int initialDelay = 520;
+    private int delayStep = 5;
+    private int minDelay = 110;
 
     public Room(int width, int height, Snake snake) {
         if (width <= 4 || height <= 4) {
@@ -49,6 +52,45 @@ public class Room {
 
     public void setMouse(Mouse mouse) {
         this.mouse = mouse;
+    }
+
+    public int getInitialDelay() {
+        return initialDelay;
+    }
+
+    public void setInitialDelay(int initialDelay) {
+        if (initialDelay < 60 || initialDelay > 1500) {
+            initialDelay = this.initialDelay;
+            System.err.println("'initialDelay' is set incorrectly. The standard value is set");
+        }
+
+        this.initialDelay = initialDelay;
+    }
+
+    public int getDelayStep() {
+        return delayStep;
+    }
+
+    public void setDelayStep(int delayStep) {
+        if (delayStep < 1 || delayStep > 1500) {
+            delayStep = this.delayStep;
+            System.err.println("'delayStep' is set incorrectly. The standard value is set");
+        }
+
+        this.delayStep = delayStep;
+    }
+
+    public int getMinDelay() {
+        return minDelay;
+    }
+
+    public void setMinDelay(int minDelay) {
+        if (minDelay < 60 || minDelay > 1500) {
+            minDelay = this.minDelay;
+            System.err.println("'minDelay' is set incorrectly. The standard value is set");
+        }
+
+        this.minDelay = minDelay;
     }
 
     public void run() {
@@ -96,11 +138,6 @@ public class Room {
             KeyboardObserver.frame.revalidate();
         }
     }
-
-
-    private int initialDelay = 520;
-    private int delayStep = 5;
-    private int minDelay = 110;
 
     public void sleep() {
         try {
